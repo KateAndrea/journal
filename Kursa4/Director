@@ -1,0 +1,111 @@
+﻿using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Kursa4
+{
+    public partial class Director : Form
+    {
+        int id;
+
+        public Director(int idi)
+        {
+            InitializeComponent();
+            id = idi;
+        }
+
+        public int Count(string user, string i, int k)
+        {
+            int ll = 0;
+            MySqlConnection connection = DBUtils.GetDBConnection();
+            connection.Open();
+            try
+            {
+                MySqlCommand command = connection.CreateCommand();
+                command.CommandText = $"Select count(*) from {user} where {i} = {k}";
+                MySqlDataReader mySqlDataReader = command.ExecuteReader();
+
+                while (mySqlDataReader.Read())
+                {
+                    ll = int.Parse($"{mySqlDataReader["count(*)"].ToString()}");
+                }
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show(exc.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+            return ll;
+        }
+
+        private void Director_Load(object sender, EventArgs e)
+        {
+            int l = this.Count("teachers", "id_inst", id);
+            MySqlConnection connection = DBUtils.GetDBConnection();
+            string[] all = new string[l];
+            int[] nid = new int[l];
+            connection.Open();
+            try
+            {
+                int i = 0;
+                MySqlCommand command = connection.CreateCommand();
+                command.CommandText = "Select * from teachers";
+                MySqlDataReader mySqlDataReader = command.ExecuteReader();
+                while (mySqlDataReader.Read())
+                {
+                    nid[i] = int.Parse($"{mySqlDataReader["id"].ToString()}");
+                    all[i] = $"{mySqlDataReader["teacher"].ToString(),-13}\t{ mySqlDataReader["ph_num"].ToString(),-13}\t";
+                    i++;
+                }
+                i = 0;
+                //for (i = 0; i < l; i++)
+                //{
+                //    command.CommandText = "Select * from sub_tch where ";
+                //    MySqlDataReader Reader = command.ExecuteReader();
+                //    while (mySqlDataReader.Read())
+                //    {
+                //        nid[i] = int.Parse($"{Reader["id"].ToString()}");
+                //        all[i] = $"{Reader["teacher"].ToString(),-13}\t{ Reader["ph_num"].ToString(),-13}\t";
+                //        i++;
+                //    }
+                //}
+
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show(exc.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+            MessageBox.Show(l.ToString());
+            for (int i = 0; i < l; i++)
+            {
+                string per = all[i];
+                all[i] = $"{per,-66}";
+                listBox1.Items.Add(all[i]);
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+    }
+}
